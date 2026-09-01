@@ -40,15 +40,9 @@
 
   .main { padding: 1.25rem; max-width: 1100px; margin: 0 auto; }
 
-  #loading-bar {
-    background: #EFF6FF; border-bottom: 2px solid #1D4ED8; padding: 8px 1.5rem;
-    font-size: .8rem; color: #1D4ED8; display: flex; align-items: center; gap: 10px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
   .project-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1rem;
     margin-top: 1.25rem;
   }
@@ -65,36 +59,77 @@
   .project-card.purple { border-color: var(--purple); }
   .project-card.amber  { border-color: var(--amber); }
 
-  .project-icon { font-size: 1.6rem; }
-  .project-title { font-size: 1rem; font-weight: 700; color: var(--navy); }
-
-  .metric-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    font-size: .8rem; color: var(--slate); border-bottom: 1px dashed var(--border);
-    padding-bottom: 6px;
+  /* ── Top: icon + editable name ── */
+  .card-top { display: flex; align-items: center; gap: 10px; }
+  .project-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .project-name-input {
+    flex: 1; min-width: 0;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 1rem; font-weight: 700; color: var(--navy);
+    border: none; border-bottom: 1.5px dashed transparent;
+    background: transparent; padding: 2px 2px 3px;
+    outline: none; width: 100%;
   }
-  .metric-row:last-of-type { border-bottom: none; padding-bottom: 0; }
-  .metric-label { color: #64748B; }
-  .metric-value {
-    font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--navy);
-    text-align: right;
-  }
+  .project-name-input:hover { border-bottom-color: var(--border); }
+  .project-name-input:focus { border-bottom-color: var(--blue); background: #F8FAFC; }
 
-  .card-links { display: flex; gap: 8px; margin-top: .3rem; }
+  /* ── Editable date fields ── */
+  .date-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .date-field { display: flex; flex-direction: column; gap: 3px; }
+  .date-field label {
+    font-size: .68rem; color: #64748B; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .date-input {
+    font-family: 'IBM Plex Mono', monospace; font-size: .8rem; color: var(--navy);
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 6px 8px; outline: none; background: var(--white);
+    width: 100%;
+  }
+  .date-input:hover { border-color: #94A3B8; }
+  .date-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(29,78,216,.12); }
+
+  /* ── Computed stats: duration + status ── */
+  .stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--light); border-radius: 10px;
+    padding: 8px 12px;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat:last-child { align-items: flex-end; }
+  .stat-label { font-size: .68rem; color: #64748B; font-weight: 600; }
+  .stat-value {
+    font-family: 'IBM Plex Mono', monospace; font-size: .82rem; font-weight: 600; color: var(--navy);
+  }
+  .status-badge {
+    display: inline-block; padding: 3px 12px; border-radius: 20px;
+    font-size: .74rem; font-weight: 700;
+  }
+  .status-none     { background: #E2E8F0; color: #64748B; }
+  .status-upcoming { background: #FEF3C7; color: var(--amber); }
+  .status-active   { background: #DCFCE7; color: var(--green); }
+  .status-done     { background: #DBEAFE; color: var(--blue); }
+
+  /* ── Links: dashboard (left) + sheet (right) ── */
+  .card-links { display: flex; gap: 8px; margin-top: .1rem; }
   .card-link {
     flex: 1; text-align: center; text-decoration: none;
     font-size: .76rem; font-weight: 600; padding: 7px 10px; border-radius: 8px;
     border: 1.5px solid var(--border); color: var(--slate);
-    transition: all .15s;
+    transition: all .15s; cursor: pointer;
   }
   .card-link:hover { background: var(--light); }
   .card-link.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
   .card-link.primary:hover { background: #16264a; }
-
-  .error-note { color: var(--red); font-size: .78rem; }
+  .card-link.disabled {
+    color: #B0B9C6; border-style: dashed; cursor: not-allowed; background: #F8FAFC;
+  }
 
   .footer-note {
     text-align: center; color: #94A3B8; font-size: .72rem; margin-top: 2rem;
+    line-height: 1.6;
   }
 </style>
 </head>
@@ -103,86 +138,159 @@
 <div class="header">
   <div>
     <div class="header-title">📁 PORTAL สรุปรวมทุกโปรเจค</div>
-    <div class="header-sub">ภาพรวมทุกโปรเจคจากโฟลเดอร์ Google Drive</div>
+    <div class="header-sub">พิมพ์ชื่อ/วันที่โปรเจคได้ในการ์ด — ระยะเวลาและสถานะคำนวณให้อัตโนมัติ</div>
   </div>
-</div>
-
-<div id="loading-bar">
-  <span>⏳ กำลังโหลดข้อมูลจากทุกโปรเจค...</span>
-  <span id="last-updated" style="margin-left:auto;color:#94A3B8;"></span>
 </div>
 
 <div class="main">
   <div class="project-grid" id="project-grid"></div>
-  <div class="footer-note">อัพเดทอัตโนมัติทุก 5 นาที · ข้อมูลดึงสดจาก Google Sheets ผ่าน Apps Script</div>
+  <div class="footer-note">
+    ข้อมูลที่พิมพ์ในหน้านี้ (ชื่อ/วันที่) จะถูกบันทึกอัตโนมัติไว้ในเบราว์เซอร์นี้เท่านั้น
+  </div>
 </div>
 
 <script>
-// ⚙️ ใส่ URL ของ Apps Script Web App ที่ deploy จากไฟล์ master-summary-appsscript.gs
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyY1w-3cnmRsTIyTYKnFBEgxNjF-kJaE-qjQ0UTFoKgLUsS5qw0vvox3v5xxAsnOC9r/exec";
+// ── ข้อมูลตั้งต้นของแต่ละโปรเจค ──
+// dashboardUrl / sheetUrl ตั้งค่าในโค้ด (ไม่ได้แก้ผ่านหน้าเว็บ) — ชื่อ/วันที่แก้ได้ในการ์ด
+const PROJECTS_DEFAULT = [
+  {
+    id: 'sales-commission',
+    icon: '💰',
+    color: 'blue',
+    name: 'ค่าคอมพิเศษเซล (ก.ค.-ส.ค. 2569)',
+    start: '2026-07-01',
+    end: '2026-08-31',
+    dashboardUrl: 'sales-commission-dashboard.html',
+    sheetUrl: 'https://docs.google.com/spreadsheets/d/1Hd8GeAGDL1w8D7WHJFHx4Y532W_aBRBJSSf35O7maE8/edit#gid=1310728965'
+  },
+  {
+    id: 'project-2', icon: '📦', color: 'teal',
+    name: 'โปรเจคใหม่ 2', start: '', end: '',
+    dashboardUrl: null, sheetUrl: null
+  },
+  {
+    id: 'project-3', icon: '📦', color: 'purple',
+    name: 'โปรเจคใหม่ 3', start: '', end: '',
+    dashboardUrl: null, sheetUrl: null
+  },
+  {
+    id: 'project-4', icon: '📦', color: 'amber',
+    name: 'โปรเจคใหม่ 4', start: '', end: '',
+    dashboardUrl: null, sheetUrl: null
+  },
+];
 
-// ถ้ามีหน้า dashboard เฉพาะของโปรเจคไหนอยู่แล้ว ใส่ลิงก์ไว้ตรงนี้ (key = id ของโปรเจค)
-const CUSTOM_DASHBOARDS = {
-  'sales-commission': null // เช่น "https://yourdomain.com/sales-dashboard.html"
-};
+const STORAGE_KEY = 'portal_projects_v1';
 
-function fmt(n) {
-  if (typeof n !== 'number') return n;
-  return n.toLocaleString('th-TH', { maximumFractionDigits: 0 });
+function loadState() {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) {}
+  return PROJECTS_DEFAULT.map(p => ({ ...p, ...(saved[p.id] || {}) }));
 }
 
-function renderProjects(projects) {
-  const grid = document.getElementById('project-grid');
-  grid.innerHTML = projects.map(p => {
-    if (p.error) {
-      return `<div class="project-card">
-        <div class="project-title">${p.icon || '⚠️'} ${p.title}</div>
-        <div class="error-note">โหลดข้อมูลไม่สำเร็จ: ${p.error}</div>
-      </div>`;
-    }
-    const metricsHtml = p.metrics.map(m => `
-      <div class="metric-row">
-        <span class="metric-label">${m.label}</span>
-        <span class="metric-value">${typeof m.value === 'number' ? fmt(m.value) : m.value} ${m.unit || ''}</span>
-      </div>`).join('');
+function saveState() {
+  const toSave = {};
+  state.forEach(p => { toSave[p.id] = { name: p.name, start: p.start, end: p.end }; });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave)); } catch (e) {}
+}
 
-    const dashboardUrl = CUSTOM_DASHBOARDS[p.id] || p.dashboardUrl;
-    const linksHtml = `
-      <div class="card-links">
-        ${dashboardUrl ? `<a class="card-link primary" href="${dashboardUrl}" target="_blank" rel="noopener">📊 ดู Dashboard</a>` : ''}
-        <a class="card-link${dashboardUrl ? '' : ' primary'}" href="${p.sheetUrl}" target="_blank" rel="noopener">📄 เปิด Sheet</a>
-      </div>`;
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function computeDuration(start, end) {
+  if (!start || !end) return '—';
+  const s = new Date(start), e = new Date(end);
+  const days = Math.round((e - s) / 86400000) + 1;
+  if (days <= 0) return '—';
+  if (days >= 30) {
+    const months = Math.floor(days / 30);
+    const rem = days % 30;
+    return `${days} วัน (~${months} เดือน${rem ? ' ' + rem + ' วัน' : ''})`;
+  }
+  return `${days} วัน`;
+}
+
+function computeStatus(start, end) {
+  if (!start || !end) return { text: 'ยังไม่ระบุวันที่', cls: 'status-none' };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const s = new Date(start), e = new Date(end);
+  if (today < s) return { text: 'ยังไม่เริ่ม', cls: 'status-upcoming' };
+  if (today > e) return { text: 'เสร็จสิ้น', cls: 'status-done' };
+  return { text: 'กำลังดำเนินการ', cls: 'status-active' };
+}
+
+function render() {
+  const grid = document.getElementById('project-grid');
+  grid.innerHTML = state.map(p => {
+    const dur = computeDuration(p.start, p.end);
+    const st = computeStatus(p.start, p.end);
+    const dashBtn = p.dashboardUrl
+      ? `<a class="card-link primary" href="${p.dashboardUrl}" target="_blank" rel="noopener">📊 ดู Dashboard</a>`
+      : `<span class="card-link disabled">📊 รอออกแบบ</span>`;
+    const sheetBtn = p.sheetUrl
+      ? `<a class="card-link" href="${p.sheetUrl}" target="_blank" rel="noopener">📄 เปิด Sheet</a>`
+      : `<span class="card-link disabled">📄 ยังไม่มี Sheet</span>`;
 
     return `<div class="project-card ${p.color}">
-      <div>
+      <div class="card-top">
         <div class="project-icon">${p.icon}</div>
-        <div class="project-title">${p.title}</div>
+        <input class="project-name-input" data-id="${p.id}" data-field="name"
+               value="${escapeHtml(p.name)}" placeholder="ชื่อโปรเจค">
       </div>
-      ${metricsHtml}
-      ${linksHtml}
+      <div class="date-grid">
+        <div class="date-field">
+          <label>เริ่มโปรเจค</label>
+          <input type="date" class="date-input" data-id="${p.id}" data-field="start" value="${p.start}">
+        </div>
+        <div class="date-field">
+          <label>สิ้นสุดโปรเจค</label>
+          <input type="date" class="date-input" data-id="${p.id}" data-field="end" value="${p.end}">
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat">
+          <span class="stat-label">รวมระยะเวลา</span>
+          <span class="stat-value" id="dur-${p.id}">${dur}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">สถานะ</span>
+          <span class="status-badge ${st.cls}" id="status-${p.id}">${st.text}</span>
+        </div>
+      </div>
+      <div class="card-links">
+        ${dashBtn}
+        ${sheetBtn}
+      </div>
     </div>`;
   }).join('');
+
+  grid.querySelectorAll('.project-name-input, .date-input').forEach(inp => {
+    inp.addEventListener('input', onFieldChange);
+  });
 }
 
-async function loadAll() {
-  const loadEl = document.getElementById('loading-bar');
-  try {
-    const res = await fetch(APPS_SCRIPT_URL);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    renderProjects(data.projects);
-    loadEl.style.display = 'none';
-    document.getElementById('last-updated').textContent =
-      'อัพเดทล่าสุด: ' + new Date().toLocaleTimeString('th-TH');
-  } catch (e) {
-    loadEl.innerHTML = `<span style="color:#B91C1C">⚠️ โหลดข้อมูลไม่สำเร็จ: ${e.message}</span>
-      <small style="color:#64748B;margin-left:8px;">ตรวจสอบว่าใส่ APPS_SCRIPT_URL ถูกต้อง และ Deploy เป็น "Anyone" แล้ว</small>`;
-    console.error(e);
+function onFieldChange(e) {
+  const id = e.target.dataset.id;
+  const field = e.target.dataset.field;
+  const proj = state.find(p => p.id === id);
+  if (!proj) return;
+  proj[field] = e.target.value;
+  saveState();
+
+  if (field === 'start' || field === 'end') {
+    document.getElementById('dur-' + id).textContent = computeDuration(proj.start, proj.end);
+    const st = computeStatus(proj.start, proj.end);
+    const badge = document.getElementById('status-' + id);
+    badge.textContent = st.text;
+    badge.className = 'status-badge ' + st.cls;
   }
 }
 
-loadAll();
-setInterval(loadAll, 5 * 60 * 1000);
+let state = loadState();
+render();
 </script>
 </body>
 </html>
