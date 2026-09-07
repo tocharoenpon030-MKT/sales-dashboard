@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal สรุปรวมทุกโปรเจค</title>
+<title>Sales Commission Dashboard — ก.ค.-ส.ค. 2569</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -26,7 +27,10 @@
     background: #EEF2F8;
     color: var(--navy);
     min-height: 100vh;
+    overflow-x: hidden;
   }
+
+  /* ── Header ── */
   .header {
     background: var(--navy);
     padding: 0 2rem;
@@ -37,99 +41,173 @@
   }
   .header-title { color: #fff; font-size: 1rem; font-weight: 700; letter-spacing: .04em; }
   .header-sub { color: #94A3B8; font-size: .78rem; margin-top: 1px; }
+  .header-badge {
+    background: #1D4ED8; color: #fff;
+    padding: 4px 14px; border-radius: 20px;
+    font-size: .78rem; font-weight: 600; letter-spacing: .06em;
+  }
 
-  .main { padding: 1.25rem; max-width: 1100px; margin: 0 auto; }
-
-  .project-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1rem;
-    margin-top: 1.25rem;
-  }
-  .project-card {
-    background: var(--white); border-radius: 14px;
-    padding: 1.25rem 1.4rem; box-shadow: var(--card-shadow);
-    border-top: 5px solid transparent;
-    transition: transform .15s;
-    display: flex; flex-direction: column; gap: .9rem;
-  }
-  .project-card:hover { transform: translateY(-3px); }
-  .project-card.blue   { border-color: var(--blue); }
-  .project-card.teal   { border-color: var(--teal); }
-  .project-card.purple { border-color: var(--purple); }
-  .project-card.amber  { border-color: var(--amber); }
-
-  /* ── Top: icon + editable name ── */
-  .card-top { display: flex; align-items: center; gap: 10px; }
-  .project-icon { font-size: 1.5rem; flex-shrink: 0; }
-  .project-name-input {
-    flex: 1; min-width: 0;
-    font-family: 'Sarabun', sans-serif;
-    font-size: 1rem; font-weight: 700; color: var(--navy);
-    border: none; border-bottom: 1.5px dashed transparent;
-    background: transparent; padding: 2px 2px 3px;
-    outline: none; width: 100%;
-  }
-  .project-name-input:hover { border-bottom-color: var(--border); }
-  .project-name-input:focus { border-bottom-color: var(--blue); background: #F8FAFC; }
-
-  /* ── Editable date fields ── */
-  .date-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-  }
-  .date-field { display: flex; flex-direction: column; gap: 3px; }
-  .date-field label {
-    font-size: .68rem; color: #64748B; font-weight: 600;
-    text-transform: uppercase; letter-spacing: .04em;
-  }
-  .date-input {
-    font-family: 'IBM Plex Mono', monospace; font-size: .8rem; color: var(--navy);
-    border: 1.5px solid var(--border); border-radius: 8px;
-    padding: 6px 8px; outline: none; background: var(--white);
+  /* ── Layout ── */
+  .main {
+    padding: 1rem;
     width: 100%;
-  }
-  .date-input:hover { border-color: #94A3B8; }
-  .date-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(29,78,216,.12); }
-
-  /* ── Computed stats: duration + status ── */
-  .stat-row {
-    display: flex; justify-content: space-between; align-items: center;
-    background: var(--light); border-radius: 10px;
-    padding: 8px 12px;
-  }
-  .stat { display: flex; flex-direction: column; gap: 2px; }
-  .stat:last-child { align-items: flex-end; }
-  .stat-label { font-size: .68rem; color: #64748B; font-weight: 600; }
-  .stat-value {
-    font-family: 'IBM Plex Mono', monospace; font-size: .82rem; font-weight: 600; color: var(--navy);
-  }
-  .status-badge {
-    display: inline-block; padding: 3px 12px; border-radius: 20px;
-    font-size: .74rem; font-weight: 700;
-  }
-  .status-none     { background: #E2E8F0; color: #64748B; }
-  .status-upcoming { background: #FEF3C7; color: var(--amber); }
-  .status-active   { background: #DCFCE7; color: var(--green); }
-  .status-done     { background: #DBEAFE; color: var(--blue); }
-
-  /* ── Links: dashboard (left) + sheet (right) ── */
-  .card-links { display: flex; gap: 8px; margin-top: .1rem; }
-  .card-link {
-    flex: 1; text-align: center; text-decoration: none;
-    font-size: .76rem; font-weight: 600; padding: 7px 10px; border-radius: 8px;
-    border: 1.5px solid var(--border); color: var(--slate);
-    transition: all .15s; cursor: pointer;
-  }
-  .card-link:hover { background: var(--light); }
-  .card-link.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
-  .card-link.primary:hover { background: #16264a; }
-  .card-link.disabled {
-    color: #B0B9C6; border-style: dashed; cursor: not-allowed; background: #F8FAFC;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
-  .footer-note {
-    text-align: center; color: #94A3B8; font-size: .72rem; margin-top: 2rem;
-    line-height: 1.6;
+  /* ── Filter bar ── */
+  .filter-bar {
+    display: flex; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center;
+  }
+  .filter-label { font-size: .82rem; color: var(--slate); font-weight: 500; margin-right: 4px; }
+  .filter-btn {
+    padding: 5px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+    background: var(--white); color: var(--slate); font-size: .82rem; font-family: 'Sarabun', sans-serif;
+    cursor: pointer; transition: all .15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--blue); color: #fff; border-color: var(--blue);
+  }
+
+  /* ── KPI Cards ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: .8rem;
+    margin-bottom: 1rem;
+  }
+  .kpi-card {
+    width: 100%;
+    min-width: 0;
+    background: var(--white); border-radius: 12px;
+    padding: 1rem 1.1rem .9rem;
+    box-shadow: var(--card-shadow);
+    border-top: 4px solid transparent;
+    transition: transform .15s;
+  }
+  .kpi-card:first-child { grid-column: 1 / -1; }
+  .kpi-card:hover { transform: translateY(-2px); }
+  .kpi-card.navy   { border-color: var(--navy); }
+  .kpi-card.blue   { border-color: var(--blue); }
+  .kpi-card.teal   { border-color: var(--teal); }
+  .kpi-card.purple { border-color: var(--purple); }
+  .kpi-card.green  { border-color: var(--green); }
+  .kpi-card.amber  { border-color: var(--amber); }
+
+  .kpi-label { font-size: .72rem; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .35rem; }
+  .kpi-value { font-family: 'IBM Plex Mono', monospace; font-size: 1.55rem; font-weight: 600; line-height: 1; }
+  .kpi-value.navy   { color: var(--navy); }
+  .kpi-value.blue   { color: var(--blue); }
+  .kpi-value.teal   { color: var(--teal); }
+  .kpi-value.purple { color: var(--purple); }
+  .kpi-value.green  { color: var(--green); }
+  .kpi-value.amber  { color: var(--amber); }
+  .kpi-unit { font-size: .72rem; color: #94A3B8; margin-top: .3rem; }
+
+  /* ── Chart grid ── */
+  .chart-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .chart-grid-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    box-shadow: var(--card-shadow);
+    width: 100%;
+    max-width: 100%;
+  }
+  .card-title {
+    font-size: .82rem; font-weight: 700; color: var(--navy);
+    text-transform: uppercase; letter-spacing: .05em;
+    margin-bottom: .9rem; padding-bottom: .6rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title span { font-size: .9rem; }
+  .chart-wrap { position: relative; height: 220px; }
+  .chart-wrap.tall { height: 280px; }
+
+  /* ── Branch table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  thead th {
+    background: var(--navy); color: #fff;
+    padding: 8px 10px; text-align: right; font-weight: 600;
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  thead th:first-child { text-align: left; border-radius: 6px 0 0 0; }
+  thead th:last-child { border-radius: 0 6px 0 0; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:hover { background: var(--light); }
+  tbody td { padding: 7px 10px; text-align: right; color: var(--slate); }
+  tbody td:first-child { text-align: left; font-weight: 600; color: var(--navy); }
+  tfoot td { padding: 8px 10px; text-align: right; font-weight: 700; background: var(--light); color: var(--navy); border-top: 2px solid var(--border); font-family: 'IBM Plex Mono', monospace; font-size: .78rem; }
+  tfoot td:first-child { text-align: left; }
+
+  /* ── Top seller bars ── */
+  .seller-list { display: flex; flex-direction: column; gap: 6px; }
+  .seller-row { display: flex; align-items: center; gap: 8px; }
+  .seller-rank { font-size: .7rem; font-weight: 700; width: 20px; text-align: right; color: #94A3B8; }
+  .seller-rank.gold { color: #F59E0B; }
+  .seller-rank.silver { color: #94A3B8; }
+  .seller-rank.bronze { color: #B45309; }
+  .seller-name { font-size: .78rem; font-weight: 600; width: 68px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--navy); }
+  .seller-bar-wrap { flex: 1; background: var(--light); border-radius: 4px; height: 18px; overflow: hidden; }
+  .seller-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 6px; transition: width .6s ease; }
+  .seller-val { font-family: 'IBM Plex Mono', monospace; font-size: .68rem; font-weight: 600; width: 52px; text-align: right; color: var(--slate); white-space: nowrap; }
+
+  /* ── Branch pills ── */
+  .branch-pill {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: .7rem; font-weight: 700;
+  }
+
+  /* ── Donut legend ── */
+  .donut-legend { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: .75rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { color: var(--slate); flex: 1; }
+  .legend-val { font-weight: 600; color: var(--navy); font-family: 'IBM Plex Mono', monospace; font-size: .72rem; }
+
+  .section-label {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: #94A3B8; margin: 1.2rem 0 .6rem;
+  }
+
+  canvas { max-width: 100% !important; }
+
+  @media (max-width: 768px) {
+    .header {
+      padding: 10px 1rem;
+      height: auto;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .header-title { font-size: .9rem; }
+    .header-sub { font-size: .7rem; line-height: 1.4; }
+    .filter-bar {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 6px;
+    }
+    .filter-btn { flex-shrink: 0; }
+    .kpi-card:nth-child(1) { grid-column: 1 / -1; }
+    .chart-wrap { height: 260px; }
+    .chart-wrap.tall { height: 320px; }
+    .card { padding: 1rem; }
+    table { min-width: 700px; }
+    .seller-name { width: 55px; font-size: .72rem; }
+    .seller-val { width: 48px; font-size: .65rem; }
   }
 </style>
 </head>
@@ -137,160 +215,579 @@
 
 <div class="header">
   <div>
-    <div class="header-title">📁 PORTAL สรุปรวมทุกโปรเจค</div>
-    <div class="header-sub">พิมพ์ชื่อ/วันที่โปรเจคได้ในการ์ด — ระยะเวลาและสถานะคำนวณให้อัตโนมัติ</div>
+    <div class="header-title">📊 SALES COMMISSION DASHBOARD</div>
+    <div class="header-sub">เป้ายอดขายเดือน  ก.ค.-ส.ค. 2569 (2 เดือน) &nbsp;|&nbsp; เป้าขายและค่าคอมรายเซล</div>
   </div>
+  <div class="header-badge">34 เซล · 7 สาขา</div>
+  <a id="raw-data-btn" href="#" target="_blank" rel="noopener"
+    style="background:#10B981;color:#fff;padding:5px 16px;border-radius:20px;
+           font-size:.78rem;font-weight:600;letter-spacing:.06em;text-decoration:none;
+           display:flex;align-items:center;gap:6px;transition:background .15s;"
+    onmouseover="this.style.background='#059669'"
+    onmouseout="this.style.background='#10B981'"
+    title="เปิด Google Sheets">
+    📊 ดู Raw Data
+  </a>
 </div>
 
+<!-- Loading Bar -->
+<div id="loading-bar" style="background:#EFF6FF;border-bottom:2px solid #1D4ED8;padding:8px 1.5rem;font-size:.8rem;color:#1D4ED8;display:flex;align-items:center;gap:10px;">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite;flex-shrink:0">
+    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+  </svg>
+  <span>กำลังโหลดข้อมูลจาก Google Sheets...</span>
+  <span id="last-updated" style="margin-left:auto;color:#94A3B8;font-size:.75rem;"></span>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
 <div class="main">
-  <div class="project-grid" id="project-grid"></div>
-  <div class="footer-note">
-    ข้อมูลที่พิมพ์ในหน้านี้ (ชื่อ/วันที่) จะถูกบันทึกอัตโนมัติไว้ในเบราว์เซอร์นี้เท่านั้น
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <span class="filter-label">สาขา :</span>
+    <button class="filter-btn active" onclick="filterBranch('all',this)">ทั้งหมด</button>
+    <button class="filter-btn" onclick="filterBranch(5,this)">สาขา 5</button>
+    <button class="filter-btn" onclick="filterBranch(9,this)">สาขา 9</button>
+    <button class="filter-btn" onclick="filterBranch(10,this)">สาขา 10</button>
+    <button class="filter-btn" onclick="filterBranch(11,this)">สาขา 11</button>
+    <button class="filter-btn" onclick="filterBranch(12,this)">สาขา 12</button>
+    <button class="filter-btn" onclick="filterBranch(13,this)">สาขา 13</button>
+    <button class="filter-btn" onclick="filterBranch(21,this)">สาขา 21</button>
   </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card navy">
+      <div class="kpi-label">เซลทั้งหมด</div>
+      <div class="kpi-value navy" id="k-sellers">34</div>
+      <div class="kpi-unit">คน</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">จำนวนลูกค้าที่ดูแลใน ToCRM</div>
+      <div class="kpi-value purple" id="k-cust">2,377</div>
+      <div class="kpi-unit">ราย</div>
+    </div>
+    <div class="kpi-card" style="border-color:#B91C1C;">
+      <div class="kpi-label">จำนวนลูกค้าที่จะตั้งเป้าทั้งหมด</div>
+      <div class="kpi-value" style="color:#B91C1C;" id="k-target-cust">678</div>
+      <div class="kpi-unit" id="k-target-cust-sub">402 ราย ≥100K | 276 ราย &lt;100K</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">รวมเป้าที่ตั้ง A+ (ยอดขายสูงสุด2เดือน+5%)</div>
+      <div class="kpi-value blue" id="k-target-max">76,710,000</div>
+      <div class="kpi-unit">บาท</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">รวมค่าคอมที่จะจ่าย A+ (แสนละ 150)</div>
+      <div class="kpi-value blue" id="k-com-max">93,450</div>
+      <div class="kpi-unit" id="k-com-max-pct">= 0.0994% ของเป้า</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">รวมเป้าที่ตั้ง A (ยอดขายสูงสุด2เดือน)</div>
+      <div class="kpi-value blue" id="k-target-min">13,660,000</div>
+      <div class="kpi-unit">บาท</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">รวมค่าคอมที่จะจ่าย A (แสนละ 100)</div>
+      <div class="kpi-value blue" id="k-com-min">12,400</div>
+      <div class="kpi-unit" id="k-com-min-pct">= 0.0798% ของเป้า</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">รวมเป้าที่ตั้ง (ลูกค้ารายเล็ก)</div>
+      <div class="kpi-value teal" id="k-target-small">9,920,000</div>
+      <div class="kpi-unit">บาท</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">รวมค่าคอมที่จะจ่าย (ลูกค้ารายเล็ก)</div>
+      <div class="kpi-value teal" id="k-com-small">7,600</div>
+      <div class="kpi-unit" id="k-com-small-pct">= 0.0757% ของเป้า</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Donut + Bar + Top Sellers -->
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title"><span>🏢</span> สัดส่วนลูกค้าที่ตั้งเป้า</div>
+      <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
+      <div class="donut-legend" id="donut-legend"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>💰</span> ค่าคอมรวมรายสาขา (A+ vs A vs ลูกค้ารายเล็ก)</div>
+      <div class="chart-wrap tall"><canvas id="branchComChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>🏆</span> Top 10 เซล — ค่าคอม A+ มากสุด</div>
+      <div class="seller-list" id="top-sellers"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Table -->
+  <div class="chart-grid-2">
+    <div class="card">
+      <div class="card-title"><span>🎯</span> สรุปรายสาขา</div>
+      <div class="table-wrap">
+        <table id="branch-table">
+          <thead>
+            <tr id="branch-thead-row">
+              <th>สาขา</th>
+              <th>เซล</th>
+              <th>ลูกค้า</th>
+              <th>เป้า (คน)</th>
+              <th>ค่าคอม A+</th>
+              <th>ค่าคอม A</th>
+              <th>คอมลูกค้ารายย่อย</th>
+            </tr>
+          </thead>
+          <tbody id="branch-tbody"></tbody>
+          <tfoot><tr id="branch-tfoot"></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-// ── ข้อมูลตั้งต้นของแต่ละโปรเจค ──
-// dashboardUrl / sheetUrl ตั้งค่าในโค้ด (ไม่ได้แก้ผ่านหน้าเว็บ) — ชื่อ/วันที่แก้ได้ในการ์ด
-const PROJECTS_DEFAULT = [
-  {
-    id: 'sales-commission',
-    icon: '💰',
-    color: 'blue',
-    name: 'ค่าคอมพิเศษเซล (ก.ค.-ส.ค. 2569)',
-    start: '2026-07-01',
-    end: '2026-08-31',
-    dashboardUrl: 'sales-commission-dashboard.html',
-    sheetUrl: 'https://docs.google.com/spreadsheets/d/1Hd8GeAGDL1w8D7WHJFHx4Y532W_aBRBJSSf35O7maE8/edit#gid=1310728965'
-  },
-  {
-    id: 'project-2', icon: '📦', color: 'teal',
-    name: 'โปรเจคใหม่ 2', start: '', end: '',
-    dashboardUrl: null, sheetUrl: null
-  },
-  {
-    id: 'project-3', icon: '📦', color: 'purple',
-    name: 'โปรเจคใหม่ 3', start: '', end: '',
-    dashboardUrl: null, sheetUrl: null
-  },
-  {
-    id: 'project-4', icon: '📦', color: 'amber',
-    name: 'โปรเจคใหม่ 4', start: '', end: '',
-    dashboardUrl: null, sheetUrl: null
-  },
+// ⚙️ Apps Script URL — ตัวกลางดึงข้อมูลจาก Google Sheets (ไม่มีปัญหา CORS)
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlxgllJz3Twn1cC4NhcwEuRwC6ygVkhaetRdA6xDIIhWrAyx6U9-ePPwIUi67kdKH49Q/exec";
+const SHEET_ID  = "1Hd8GeAGDL1w8D7WHJFHx4Y532W_aBRBJSSf35O7maE8";
+const SHEET_GID = "1310728965";
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${SHEET_GID}`;
+
+// ลิงก์ตรงไปแต่ละแถวใน Sheets
+function sheetUrl(row) {
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?gid=${SHEET_GID}#gid=${SHEET_GID}&range=A${row}`;
+}
+
+// — ตัวแปร global —
+let RAW = [];
+let currentBranch = 'all';
+let charts = {};
+
+function n(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  return parseFloat(String(v).replace(/,/g,'')) || 0;
+}
+
+// — แปลง rows จาก Apps Script JSON → RAW format —
+function rowsToRAW(rows) {
+  const result = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const branch = parseInt(r[0]);
+    const name   = String(r[1] || '').trim();
+    if (!name || isNaN(branch) || name === 'รวม') continue;
+    result.push({
+      b:   branch,
+      n:   name,
+      row: i + 1,
+      tc:  n(r[2]),
+      tg:  n(r[3]),
+      lo:  n(r[4]),
+      lmn: n(r[5]),
+      lcn: n(r[6]),
+      lmx: n(r[7]),
+      lcx: n(r[8]),
+      hi:  n(r[9]),
+      hmx: n(r[10]),
+      hcx: n(r[11]),
+    });
+  }
+  return result;
+}
+
+// — โหลดข้อมูลจาก Apps Script —
+async function loadFromSheets() {
+  const loadEl = document.getElementById('loading-bar');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows = await res.json();
+    RAW = rowsToRAW(rows);
+    if (RAW.length === 0) throw new Error('ไม่พบข้อมูลในชีท');
+    if (loadEl) loadEl.style.display = 'none';
+    const btn = document.getElementById('raw-data-btn');
+    if (btn) btn.href = SHEET_URL;
+    updateAll();
+    const ts = document.getElementById('last-updated');
+    if (ts) ts.textContent = 'อัพเดทล่าสุด: ' + new Date().toLocaleTimeString('th-TH');
+  } catch(e) {
+    if (loadEl) {
+      loadEl.innerHTML = `<span style="color:#B91C1C">⚠️ โหลดข้อมูลไม่สำเร็จ: ${e.message}</span>
+        <small style="color:#64748B;margin-left:8px;">ตรวจสอบว่า Apps Script Deploy แล้ว และตั้ง Access: Anyone</small>`;
+    }
+    console.error('Sheets load error:', e);
+  }
+}
+
+// — Fallback RAW (ข้อมูล hardcode ไว้กันพลาด) —
+const RAW_FALLBACK = [
+  {b:5,  n:"ขวัญ5",    row:2,  tc:89,  tg:13, lo:3,  lmn:400000,  lcn:300,  lmx:320000,  lcx:300,  hi:10, hmx:600000,  hcx:500},
+  {b:5,  n:"จอย5",     row:3,  tc:157, tg:28, lo:28, lmn:4780000, lcn:4000, lmx:4900000, lcx:5850, hi:0,  hmx:0,       hcx:0},
+  {b:5,  n:"เจน5",     row:4,  tc:158, tg:17, lo:17, lmn:3030000, lcn:2500, lmx:3090000, lcx:3600, hi:0,  hmx:0,       hcx:0},
+  {b:5,  n:"บี5",      row:5,  tc:64,  tg:21, lo:7,  lmn:1110000, lcn:900,  lmx:1050000, lcx:1200, hi:14, hmx:860000,  hcx:700},
+  {b:5,  n:"มิ้น5",    row:6,  tc:1,   tg:0,  lo:0,  lmn:0,       lcn:0,    lmx:0,       lcx:0,    hi:0,  hmx:0,       hcx:0},
+  {b:9,  n:"นุ่น9",    row:7,  tc:62,  tg:24, lo:8,  lmn:1000000, lcn:800,  lmx:960000,  lcx:1050, hi:16, hmx:1180000, hcx:800},
+  {b:9,  n:"บุ๋ม9",    row:8,  tc:56,  tg:17, lo:17, lmn:3950000, lcn:3600, lmx:3820000, lcx:4950, hi:0,  hmx:0,       hcx:0},
+  {b:9,  n:"เพน9",     row:9,  tc:58,  tg:23, lo:23, lmn:4080000, lcn:3400, lmx:4180000, lcx:4950, hi:0,  hmx:0,       hcx:0},
+  {b:9,  n:"ลูกปลา9",  row:10, tc:108, tg:19, lo:19, lmn:3370000, lcn:2700, lmx:3450000, lcx:3900, hi:0,  hmx:0,       hcx:0},
+  {b:9,  n:"แหม่ม9",   row:11, tc:72,  tg:15, lo:15, lmn:3270000, lcn:2900, lmx:3440000, lcx:4350, hi:0,  hmx:0,       hcx:0},
+  {b:9,  n:"ใหม่9",    row:12, tc:26,  tg:14, lo:7,  lmn:1480000, lcn:1300, lmx:1560000, lcx:1950, hi:7,  hmx:470000,  hcx:350},
+  {b:10, n:"ต๊ะ10",    row:13, tc:94,  tg:10, lo:10, lmn:2090000, lcn:1900, lmx:2090000, lcx:2700, hi:0,  hmx:0,       hcx:0},
+  {b:10, n:"นาง10",    row:14, tc:93,  tg:29, lo:29, lmn:5620000, lcn:5000, lmx:5910000, lcx:7500, hi:0,  hmx:0,       hcx:0},
+  {b:10, n:"เฟิร์น10", row:15, tc:85,  tg:22, lo:22, lmn:3380000, lcn:2900, lmx:3220000, lcx:3900, hi:0,  hmx:0,       hcx:0},
+  {b:10, n:"ส้ม10",    row:16, tc:48,  tg:17, lo:7,  lmn:1220000, lcn:1000, lmx:1060000, lcx:1200, hi:10, hmx:590000,  hcx:500},
+  {b:10, n:"หนึ่ง10",  row:17, tc:81,  tg:12, lo:12, lmn:1900000, lcn:1600, lmx:1780000, lcx:2100, hi:0,  hmx:0,       hcx:0},
+  {b:11, n:"เจน11",    row:18, tc:57,  tg:27, lo:8,  lmn:1080000, lcn:800,  lmx:1140000, lcx:1200, hi:19, hmx:1250000, hcx:950},
+  {b:11, n:"เตย11",    row:19, tc:69,  tg:27, lo:13, lmn:1970000, lcn:1600, lmx:1750000, lcx:1950, hi:14, hmx:0,       hcx:0},
+  {b:11, n:"นก11",     row:20, tc:67,  tg:34, lo:17, lmn:2830000, lcn:2500, lmx:2710000, lcx:3450, hi:17, hmx:0,       hcx:0},
+  {b:11, n:"เบลล่า11", row:21, tc:77,  tg:18, lo:7,  lmn:1090000, lcn:800,  lmx:1150000, lcx:1200, hi:11, hmx:620000,  hcx:550},
+  {b:11, n:"แป๋ม11",   row:22, tc:39,  tg:25, lo:15, lmn:4330000, lcn:4100, lmx:4440000, lcx:6000, hi:10, hmx:0,       hcx:0},
+  {b:12, n:"นุช12",    row:23, tc:48,  tg:19, lo:4,  lmn:820000,  lcn:600,  lmx:860000,  lcx:900,  hi:15, hmx:1040000, hcx:750},
+  {b:12, n:"เน็ท12",   row:24, tc:23,  tg:7,  lo:4,  lmn:1110000, lcn:1000, lmx:1170000, lcx:1500, hi:3,  hmx:180000,  hcx:150},
+  {b:12, n:"ปู12",     row:25, tc:114, tg:58, lo:25, lmn:4760000, lcn:4200, lmx:4810000, lcx:6000, hi:33, hmx:0,       hcx:0},
+  {b:12, n:"แป้ง12",   row:26, tc:144, tg:4,  lo:1,  lmn:270000,  lcn:200,  lmx:290000,  lcx:300,  hi:3,  hmx:170000,  hcx:150},
+  {b:12, n:"ผึ้ง12",   row:27, tc:37,  tg:10, lo:4,  lmn:560000,  lcn:500,  lmx:480000,  lcx:600,  hi:6,  hmx:430000,  hcx:300},
+  {b:12, n:"ไอซ์12",   row:28, tc:147, tg:71, lo:36, lmn:6310000, lcn:5500, lmx:6420000, lcx:7950, hi:35, hmx:0,       hcx:0},
+  {b:13, n:"มิ้ว13",   row:29, tc:31,  tg:17, lo:7,  lmn:1110000, lcn:800,  lmx:1040000, lcx:1050, hi:10, hmx:630000,  hcx:500},
+  {b:13, n:"แสง13",    row:30, tc:64,  tg:26, lo:11, lmn:2700000, lcn:2400, lmx:2730000, lcx:3450, hi:15, hmx:0,       hcx:0},
+  {b:13, n:"อ้อน13",   row:31, tc:23,  tg:7,  lo:3,  lmn:460000,  lcn:300,  lmx:470000,  lcx:450,  hi:4,  hmx:240000,  hcx:200},
+  {b:13, n:"อ้อย13",   row:32, tc:63,  tg:11, lo:4,  lmn:450000,  lcn:400,  lmx:480000,  lcx:600,  hi:7,  hmx:520000,  hcx:350},
+  {b:13, n:"อีฟ13",    row:33, tc:31,  tg:20, lo:9,  lmn:2740000, lcn:2500, lmx:2880000, lcx:3750, hi:11, hmx:690000,  hcx:550},
+  {b:21, n:"บิ้ก21",   row:34, tc:14,  tg:6,  lo:5,  lmn:880000,  lcn:600,  lmx:920000,  lcx:900,  hi:1,  hmx:80000,   hcx:50},
+  {b:21, n:"อิ๊ง21",   row:35, tc:77,  tg:10, lo:5,  lmn:1400000, lcn:1300, lmx:1470000, lcx:1950, hi:5,  hmx:370000,  hcx:250},
 ];
 
-const STORAGE_KEY = 'portal_projects_v1';
+const BRANCH_COLORS = {5:"#1D4ED8",9:"#0F766E",10:"#15803D",11:"#6D28D9",12:"#B45309",13:"#B91C1C",21:"#0F1E3C"};
+const BRANCH_LIGHT  = {5:"#DBEAFE",9:"#CCFBF1",10:"#DCFCE7",11:"#EDE9FE",12:"#FEF3C7",13:"#FEE2E2",21:"#CBD5E1"};
 
-function loadState() {
-  let saved = {};
-  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) {}
-  return PROJECTS_DEFAULT.map(p => ({ ...p, ...(saved[p.id] || {}) }));
+function sellerLink(r) {
+  const url = sheetUrl(r.row);
+  return `<a href="${url}" target="_blank" rel="noopener"
+    style="font-weight:700;color:var(--navy);text-decoration:none;
+           border-bottom:1.5px dashed #CBD5E1;padding-bottom:1px;
+           transition:color .15s,border-color .15s;"
+    onmouseover="this.style.color='#1D4ED8';this.style.borderColor='#1D4ED8'"
+    onmouseout="this.style.color='var(--navy)';this.style.borderColor='#CBD5E1'"
+    title="ดูข้อมูลใน Google Sheets ↗">${r.n} <span style="font-size:.65rem;opacity:.6">↗</span></a>`;
 }
 
-function saveState() {
-  const toSave = {};
-  state.forEach(p => { toSave[p.id] = { name: p.name, start: p.start, end: p.end }; });
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave)); } catch (e) {}
+function fmt(n) { return n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(0)+'K' : n.toLocaleString('th-TH'); }
+function fmtFull(n) { return n.toLocaleString('th-TH'); }
+
+function getFiltered() {
+  return currentBranch === 'all' ? RAW : RAW.filter(r => r.b === currentBranch);
 }
 
-function escapeHtml(str) {
-  return String(str || '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
+function filterBranch(b, el) {
+  currentBranch = b;
+  document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  updateAll();
 }
 
-function computeDuration(start, end) {
-  if (!start || !end) return '—';
-  const s = new Date(start), e = new Date(end);
-  const days = Math.round((e - s) / 86400000) + 1;
-  if (days <= 0) return '—';
-  if (days >= 30) {
-    const months = Math.floor(days / 30);
-    const rem = days % 30;
-    return `${days} วัน (~${months} เดือน${rem ? ' ' + rem + ' วัน' : ''})`;
-  }
-  return `${days} วัน`;
+function updateKPI(data) {
+  const isAll = currentBranch === 'all';
+
+  document.getElementById('k-sellers').textContent = data.length;
+  document.getElementById('k-cust').textContent = fmtFull(data.reduce((s,r)=>s+r.tc,0));
+
+  // จำนวนลูกค้าที่ตั้งเป้า — lo = ≥100K, hi = <100K
+  const totalLo = data.reduce((s,r)=>s+r.lo,0);
+  const totalHi = data.reduce((s,r)=>s+r.hi,0);
+  const totalTg = data.reduce((s,r)=>s+r.tg,0);
+  document.getElementById('k-target-cust').textContent = fmtFull(totalTg);
+  document.getElementById('k-target-cust-sub').textContent =
+    `${fmtFull(totalLo)} ราย ≥100K | ${fmtFull(totalHi)} ราย <100K`;
+
+  // เป้าขายสูงสุด = lmx เท่านั้น (ไม่รวม hmx)
+  const tmax  = data.reduce((s,r)=>s+r.lmx,0);
+  const comMax = data.reduce((s,r)=>s+r.lcx,0);
+  document.getElementById('k-target-max').textContent = fmtFull(tmax);
+  document.getElementById('k-com-max').textContent = fmtFull(comMax);
+  document.getElementById('k-com-max-pct').textContent =
+    tmax > 0 ? `= ${(comMax/tmax*100).toFixed(4)}% ของเป้า` : '';
+
+  // เป้าขายขั้นต่ำ = lmn
+  const tmin  = data.reduce((s,r)=>s+r.lmn,0);
+  const comMin = data.reduce((s,r)=>s+r.lcn,0);
+  document.getElementById('k-target-min').textContent = fmtFull(tmin);
+  document.getElementById('k-com-min').textContent = fmtFull(comMin);
+  document.getElementById('k-com-min-pct').textContent =
+    tmin > 0 ? `= ${(comMin/tmin*100).toFixed(4)}% ของเป้า` : '';
+
+  // ลูกค้ารายเล็ก = hmx
+  const tsmall  = data.reduce((s,r)=>s+r.hmx,0);
+  const comSmall = data.reduce((s,r)=>s+r.hcx,0);
+  document.getElementById('k-target-small').textContent = fmtFull(tsmall);
+  document.getElementById('k-com-small').textContent = fmtFull(comSmall);
+  document.getElementById('k-com-small-pct').textContent =
+    tsmall > 0 ? `= ${(comSmall/tsmall*100).toFixed(4)}% ของเป้า` : '';
 }
 
-function computeStatus(start, end) {
-  if (!start || !end) return { text: 'ยังไม่ระบุวันที่', cls: 'status-none' };
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const s = new Date(start), e = new Date(end);
-  if (today < s) return { text: 'ยังไม่เริ่ม', cls: 'status-upcoming' };
-  if (today > e) return { text: 'เสร็จสิ้น', cls: 'status-done' };
-  return { text: 'กำลังดำเนินการ', cls: 'status-active' };
+function getBranchSummary(data) {
+  const bmap = {};
+  data.forEach(r => {
+    if (!bmap[r.b]) bmap[r.b] = {sellers:0,tc:0,tg:0,comMax:0,comLcx:0,comMin:0,comSmall:0};
+    bmap[r.b].sellers++;
+    bmap[r.b].tc += r.tc;
+    bmap[r.b].tg += r.tg;
+    bmap[r.b].comMax   += r.lcx + r.hcx;
+    bmap[r.b].comLcx   += r.lcx;
+    bmap[r.b].comMin   += r.lcn + (r.hcn||0);
+    bmap[r.b].comSmall += r.hcx;
+  });
+  return bmap;
 }
 
-function render() {
-  const grid = document.getElementById('project-grid');
-  grid.innerHTML = state.map(p => {
-    const dur = computeDuration(p.start, p.end);
-    const st = computeStatus(p.start, p.end);
-    const dashBtn = p.dashboardUrl
-      ? `<a class="card-link primary" href="${p.dashboardUrl}" target="_blank" rel="noopener">📊 ดู Dashboard</a>`
-      : `<span class="card-link disabled">📊 รอออกแบบ</span>`;
-    const sheetBtn = p.sheetUrl
-      ? `<a class="card-link" href="${p.sheetUrl}" target="_blank" rel="noopener">📄 เปิด Sheet</a>`
-      : `<span class="card-link disabled">📄 ยังไม่มี Sheet</span>`;
+function updateDonut(data) {
+  const totalLo = data.reduce((s,r)=>s+r.lo, 0);
+  const totalHi = data.reduce((s,r)=>s+r.hi, 0);
+  const total   = totalLo + totalHi;
 
-    return `<div class="project-card ${p.color}">
-      <div class="card-top">
-        <div class="project-icon">${p.icon}</div>
-        <input class="project-name-input" data-id="${p.id}" data-field="name"
-               value="${escapeHtml(p.name)}" placeholder="ชื่อโปรเจค">
-      </div>
-      <div class="date-grid">
-        <div class="date-field">
-          <label>เริ่มโปรเจค</label>
-          <input type="date" class="date-input" data-id="${p.id}" data-field="start" value="${p.start}">
-        </div>
-        <div class="date-field">
-          <label>สิ้นสุดโปรเจค</label>
-          <input type="date" class="date-input" data-id="${p.id}" data-field="end" value="${p.end}">
-        </div>
-      </div>
-      <div class="stat-row">
-        <div class="stat">
-          <span class="stat-label">รวมระยะเวลา</span>
-          <span class="stat-value" id="dur-${p.id}">${dur}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">สถานะ</span>
-          <span class="status-badge ${st.cls}" id="status-${p.id}">${st.text}</span>
-        </div>
-      </div>
-      <div class="card-links">
-        ${dashBtn}
-        ${sheetBtn}
-      </div>
-    </div>`;
-  }).join('');
+  const labels = [
+    'ลูกค้าเป้าเกิน 1 แสน (A / A+)',
+    'ลูกค้าต่ำกว่า 1 แสน (รายเล็ก)'
+  ];
+  const vals   = [totalLo, totalHi];
+  const colors = ['#1D4ED8', '#0F766E'];
 
-  grid.querySelectorAll('.project-name-input, .date-input').forEach(inp => {
-    inp.addEventListener('input', onFieldChange);
+  if (charts.donut) charts.donut.destroy();
+  charts.donut = new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        backgroundColor: colors,
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      cutout: '62%',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${fmtFull(ctx.raw)} ราย (${total > 0 ? (ctx.raw/total*100).toFixed(1) : 0}%)`
+          }
+        }
+      }
+    }
+  });
+
+  document.getElementById('donut-legend').innerHTML = `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#1D4ED8"></div>
+      <div class="legend-label">เป้าเกิน 1 แสน (A / A+)</div>
+      <div class="legend-val">${fmtFull(totalLo)} ราย (${total > 0 ? (totalLo/total*100).toFixed(1) : 0}%)</div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#0F766E"></div>
+      <div class="legend-label">ต่ำกว่า 1 แสน (รายเล็ก)</div>
+      <div class="legend-val">${fmtFull(totalHi)} ราย (${total > 0 ? (totalHi/total*100).toFixed(1) : 0}%)</div>
+    </div>
+  `;
+}
+
+function updateBranchCom(data) {
+  const bmap = getBranchSummary(data);
+  const labels    = Object.keys(bmap).map(b => `สาขา ${b}`);
+  const maxVals   = Object.keys(bmap).map(b => bmap[b].comLcx);
+  const minVals   = Object.keys(bmap).map(b => bmap[b].comMin);
+  const smallVals = Object.keys(bmap).map(b => bmap[b].comSmall);
+  const colors    = Object.keys(bmap).map(b => BRANCH_COLORS[b]);
+
+  if (charts.branchCom) charts.branchCom.destroy();
+  charts.branchCom = new Chart(document.getElementById('branchComChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'A+ (ยอดขายสูงสุด2เดือน+5%)',   data: maxVals,   backgroundColor: colors,                  borderRadius: 6 },
+        { label: 'A (ยอดขายสูงสุด2เดือน)',   data: minVals,   backgroundColor: colors.map(c => c+'55'), borderRadius: 6 },
+        { label: 'ลูกค้ารายเล็ก',   data: smallVals, backgroundColor: colors.map(c => c+'99'), borderRadius: 6 },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${fmtFull(ctx.raw)} บาท`
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: v => fmt(v) }
+        }
+      }
+    }
   });
 }
 
-function onFieldChange(e) {
-  const id = e.target.dataset.id;
-  const field = e.target.dataset.field;
-  const proj = state.find(p => p.id === id);
-  if (!proj) return;
-  proj[field] = e.target.value;
-  saveState();
+function updateTopSellers(data) {
+  const sorted = [...data].sort((a,b) => b.lcx - a.lcx).slice(0,10);
+  const maxCom = sorted[0] ? sorted[0].lcx : 1;
+  const medals = ['🥇','🥈','🥉'];
 
-  if (field === 'start' || field === 'end') {
-    document.getElementById('dur-' + id).textContent = computeDuration(proj.start, proj.end);
-    const st = computeStatus(proj.start, proj.end);
-    const badge = document.getElementById('status-' + id);
-    badge.textContent = st.text;
-    badge.className = 'status-badge ' + st.cls;
-  }
+  document.getElementById('top-sellers').innerHTML = sorted.map((r,i) => {
+    const com = r.lcx;
+    const pct = (com / maxCom * 100).toFixed(0);
+    const rankClass = i < 3 ? ['gold','silver','bronze'][i] : '';
+    return `<div class="seller-row">
+      <div class="seller-rank ${rankClass}">${i < 3 ? medals[i] : i+1}</div>
+      <div class="seller-name" title="${r.n}">${
+        (() => {
+          const url = sheetUrl(r.row);
+          if (!url) return r.n;
+          return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--navy);text-decoration:none;border-bottom:1px dashed #CBD5E1;" title="ดูใน Sheets ↗">${r.n}</a>`;
+        })()
+      }</div>
+      <div class="seller-bar-wrap">
+        <div class="seller-bar" style="width:${pct}%;background:${BRANCH_COLORS[r.b]}"></div>
+      </div>
+      <div class="seller-val">${fmtFull(com)}</div>
+    </div>`;
+  }).join('');
 }
 
-let state = loadState();
-render();
+function updateSellerChart(data) {
+  const sorted = [...data].sort((a,b) => (b.lmx+b.hmx)-(a.lmx+a.hmx)).slice(0,15);
+  const labels = sorted.map(r => r.n);
+  const maxVals = sorted.map(r => r.lmx + r.hmx);
+  const minVals = sorted.map(r => r.lmn + (r.hmn||0));
+  const colors = sorted.map(r => BRANCH_COLORS[r.b]);
+
+  if (charts.sellerTarget) charts.sellerTarget.destroy();
+  charts.sellerTarget = new Chart(document.getElementById('sellerTargetChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'เป้า (มากสุด)', data: maxVals, backgroundColor: colors, borderRadius: 4 },
+        { label: 'เป้า (น้อยสุด)', data: minVals, backgroundColor: colors.map(c=>c+'44'), borderRadius: 4 },
+      ]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 11 }, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtFull(ctx.raw)} บาท` } }
+      },
+      scales: {
+        y: { grid: { display: false }, ticks: { font: { family: 'Sarabun', size: 10 } } },
+        x: { grid: { color: '#F1F5F9' }, ticks: { font: { family: 'IBM Plex Mono', size: 10 }, callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+function updateBranchTable(data) {
+  const isBranch = currentBranch !== 'all';
+
+  // อัปเดต header
+  document.getElementById('branch-thead-row').innerHTML = isBranch
+    ? `<th>เซล</th>
+       <th>ลูกค้า ToCRM</th>
+       <th>≥100K (คน)</th>
+       <th>50K–100K (คน)</th>
+       <th>ค่าคอม A+</th>
+       <th>ค่าคอม A</th>
+       <th>คอมรายย่อย</th>`
+    : `<th>สาขา</th>
+       <th>เซล</th>
+       <th>ลูกค้า</th>
+       <th>เป้า (คน)</th>
+       <th>ค่าคอม A+</th>
+       <th>ค่าคอม A</th>
+       <th>คอมลูกค้ารายย่อย</th>`;
+
+  if (isBranch) {
+    // แสดงรายเซล
+    const sorted = [...data].sort((a,b) => (b.lcx+b.hcx) - (a.lcx+a.hcx));
+    document.getElementById('branch-tbody').innerHTML = sorted.map(r => `
+      <tr>
+        <td>${sellerLink(r)}</td>
+        <td>${fmtFull(r.tc)}</td>
+        <td>${fmtFull(r.lo)}</td>
+        <td>${fmtFull(r.hi)}</td>
+        <td style="color:var(--green);font-weight:600;font-family:'IBM Plex Mono',monospace">${fmtFull(r.lcx)}</td>
+        <td style="color:var(--amber);font-weight:600;font-family:'IBM Plex Mono',monospace">${fmtFull(r.lcn)}</td>
+        <td style="color:var(--teal);font-weight:600;font-family:'IBM Plex Mono',monospace">${fmtFull(r.hcx)}</td>
+      </tr>`).join('');
+  } else {
+    // แสดงรายสาขา
+    const bmap = getBranchSummary(data);
+    document.getElementById('branch-tbody').innerHTML = Object.keys(bmap).map(b => `
+      <tr>
+        <td><span class="branch-pill" style="background:${BRANCH_LIGHT[b]};color:${BRANCH_COLORS[b]}">สาขา ${b}</span></td>
+        <td>${bmap[b].sellers}</td>
+        <td>${fmtFull(bmap[b].tc)}</td>
+        <td>${fmtFull(bmap[b].tg)}</td>
+        <td style="color:var(--green);font-weight:600;font-family:'IBM Plex Mono',monospace">${fmtFull(bmap[b].comMax)}</td>
+        <td style="color:var(--amber);font-weight:600;font-family:'IBM Plex Mono',monospace">${fmtFull(bmap[b].comMin)}</td>
+        <td style="color:var(--teal);font-weight:600;font-family:'IBM Plex Mono',monospace">${fmtFull(bmap[b].comSmall)}</td>
+      </tr>`).join('');
+  }
+
+  // tfoot รวม
+  const totalTc    = data.reduce((s,r)=>s+r.tc,0);
+  const totalLo    = data.reduce((s,r)=>s+r.lo,0);
+  const totalHi    = data.reduce((s,r)=>s+r.hi,0);
+  const totalTg    = data.reduce((s,r)=>s+r.tg,0);
+  const totalCMax  = data.reduce((s,r)=>s+r.lcx,0);
+  const totalCMin  = data.reduce((s,r)=>s+r.lcn,0);
+  const totalCSmall = data.reduce((s,r)=>s+r.hcx,0);
+
+  document.getElementById('branch-tfoot').innerHTML = isBranch
+    ? `<td>รวม</td>
+       <td>${fmtFull(totalTc)}</td>
+       <td>${fmtFull(totalLo)}</td>
+       <td>${fmtFull(totalHi)}</td>
+       <td>${fmtFull(totalCMax)}</td>
+       <td>${fmtFull(totalCMin)}</td>
+       <td>${fmtFull(totalCSmall)}</td>`
+    : `<td>รวมทั้งหมด</td>
+       <td>${data.length}</td>
+       <td>${fmtFull(totalTc)}</td>
+       <td>${fmtFull(totalTg)}</td>
+       <td>${fmtFull(totalCMax)}</td>
+       <td>${fmtFull(totalCMin)}</td>
+       <td>${fmtFull(totalCSmall)}</td>`;
+}
+
+function updateAll() {
+  const data = getFiltered();
+  updateKPI(data);
+  updateDonut(data);
+  updateBranchCom(data);
+  updateTopSellers(data);
+  updateBranchTable(data);
+}
+
+// โหลดจาก Sheets ตอน page load
+loadFromSheets().catch(() => {
+  // ถ้า fetch ไม่ได้ (เช่น ยังไม่ Publish) ใช้ข้อมูล fallback
+  RAW = RAW_FALLBACK;
+  document.getElementById('loading-bar').innerHTML =
+    '⚠️ ใช้ข้อมูล fallback (ไม่สามารถโหลดจาก Sheets ได้) — กรุณา Publish ชีทก่อน';
+  updateAll();
+});
+
+// อัพเดทอัตโนมัติทุก 5 นาที
+setInterval(() => loadFromSheets(), 5 * 60 * 1000);
+
+// อัพเดทปุ่ม Raw Data
+const btn = document.getElementById('raw-data-btn');
+if (btn) btn.href = SHEET_URL;
 </script>
 </body>
 </html>
